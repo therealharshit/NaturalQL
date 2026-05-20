@@ -6,6 +6,7 @@ import {
   McpConnection,
   QueryDraft,
   QueryResult,
+  ResultExplanation,
   SchemaSnapshot,
 } from "@/lib/types/query";
 
@@ -25,6 +26,7 @@ type DraftResponse = ApiResponse<{
 type ExecuteResponse = ApiResponse<{
   sql: string;
   result: QueryResult;
+  explanation: ResultExplanation;
   tablesReferenced: string[];
 }>;
 
@@ -37,6 +39,7 @@ export function AnalystWorkspace() {
   const [draft, setDraft] = useState<QueryDraft | null>(null);
   const [safeSql, setSafeSql] = useState("");
   const [result, setResult] = useState<QueryResult | null>(null);
+  const [explanation, setExplanation] = useState<ResultExplanation | null>(null);
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -59,6 +62,7 @@ export function AnalystWorkspace() {
       setSchema(response.schema);
       setDraft(null);
       setResult(null);
+      setExplanation(null);
       setMessage(
         `Connected. Found ${response.schema.tables.length} tables and selected ${Object.values(response.selectedTools).filter(Boolean).length} MCP tools.`,
       );
@@ -71,6 +75,7 @@ export function AnalystWorkspace() {
 
     setMessage("");
     setResult(null);
+    setExplanation(null);
     startTransition(async () => {
       const response = await postJson<DraftResponse>("/api/query/draft", {
         question,
@@ -102,6 +107,8 @@ export function AnalystWorkspace() {
       const response = await postJson<ExecuteResponse>("/api/query/execute", {
         connection,
         sql: safeSql,
+        question,
+        caveats: draft?.caveats ?? [],
         approved: true,
         maxRows: 500,
       });
@@ -113,6 +120,7 @@ export function AnalystWorkspace() {
 
       setSafeSql(response.sql);
       setResult(response.result);
+      setExplanation(response.explanation);
       setMessage(
         response.result.truncated
           ? `Returned ${response.result.rows.length} rows. Result was truncated.`
@@ -244,6 +252,27 @@ export function AnalystWorkspace() {
               title="Assumptions"
               value={draft.assumptions.join("; ") || "None"}
             />
+          </div>
+        ) : null}
+
+        {explanation ? (
+          <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+              Explanation
+            </p>
+            <p className="mt-3 text-lg font-medium text-stone-950">
+              {explanation.summary}
+            </p>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-stone-700">
+              {explanation.findings.map((finding) => (
+                <li key={finding}>{finding}</li>
+              ))}
+            </ul>
+            {explanation.caveats.length > 0 ? (
+              <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-950">
+                {explanation.caveats.join(" ")}
+              </div>
+            ) : null}
           </div>
         ) : null}
 

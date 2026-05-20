@@ -1,3 +1,4 @@
+import { explainResults } from "@/lib/ai/explain-results";
 import { executeReadOnlyQuery } from "@/lib/mcp/tools";
 import { validateRemoteMcpEndpoint } from "@/lib/mcp/validate-endpoint";
 import { validateReadOnlySql } from "@/lib/sql/validate-readonly";
@@ -7,6 +8,8 @@ import { z } from "zod";
 const ExecuteRequestSchema = z.object({
   connection: McpConnectionSchema,
   sql: z.string().min(1),
+  question: z.string().min(1),
+  caveats: z.array(z.string()).default([]),
   approved: z.literal(true),
   maxRows: z.number().int().min(1).max(1_000).default(500),
 });
@@ -61,15 +64,23 @@ export async function POST(request: Request) {
       sqlValidation.normalizedSql,
       parsed.data.maxRows,
     );
+    const explanation = await explainResults({
+      question: parsed.data.question,
+      sql: sqlValidation.normalizedSql,
+      result,
+      caveats: parsed.data.caveats,
+    });
 
     return Response.json({
       ok: true,
       sql: sqlValidation.normalizedSql,
       result,
+      explanation,
       tablesReferenced: sqlValidation.tablesReferenced,
     } satisfies ApiResponse<{
       sql: string;
       result: QueryResult;
+      explanation: Awaited<ReturnType<typeof explainResults>>;
       tablesReferenced: string[];
     }>);
   } catch (error) {

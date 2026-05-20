@@ -50,6 +50,14 @@ export const QueryResultSchema = z.object({
 
 export type QueryResult = z.infer<typeof QueryResultSchema>;
 
+export const ResultExplanationSchema = z.object({
+  summary: z.string(),
+  findings: z.array(z.string()),
+  caveats: z.array(z.string()),
+});
+
+export type ResultExplanation = z.infer<typeof ResultExplanationSchema>;
+
 export type ApiErrorCode =
   | "INVALID_INPUT"
   | "UNSAFE_ENDPOINT"
