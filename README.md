@@ -1,13 +1,13 @@
 # Natural QL
 
-Natural QL is a guarded MCP SQL copilot for real databases. A user connects a remote database MCP server, asks a business question in plain English, reviews the generated SQL, approves execution, and gets a table plus a plain-English explanation.
+Natural QL is a guarded MCP SQL copilot for real databases. A user connects a remote database MCP server, asks a business question in plain English, reviews the generated SQL, approves execution, and gets a table plus a plain-English explanation — all through a conversational chat interface.
 
 The v1 product is intentionally narrow: remote HTTP MCP, Postgres-style read-only SQL, explicit user approval, and parser-backed guardrails.
 
 ## Docs
 
 - [User guide](docs/user-guide.md) — how end users connect an MCP server, ask questions, approve SQL, and read results.
-- [Developer docs](docs/developer-docs.md) — architecture, API routes, guardrails, environment variables, testing, and implementation details.
+- [Developer docs](docs/developer-docs.md) — architecture, UI components, API routes, guardrails, environment variables, testing, and implementation details.
 
 ## Quick Start
 
@@ -26,6 +26,15 @@ OPENAI_MODEL=gpt-5.4-mini
 ```
 
 `OPENAI_MODEL` is optional. If unset, the app uses `gpt-5.4-mini`.
+
+## UI
+
+Natural QL uses a full-screen chat interface inspired by modern AI assistants:
+
+- **Chat input** at the bottom — type natural language questions.
+- **Message thread** in the center — user questions, AI-drafted SQL cards, approval buttons, and query results all appear in a conversational flow.
+- **Connection dialog** in the header — connect your MCP database server via a modal.
+- **Greeting screen** — suggested queries shown when no conversation has started.
 
 ## Safety Model
 

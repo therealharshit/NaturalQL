@@ -1,13 +1,13 @@
 # Natural QL Developer Docs
 
-Natural QL is a Next.js 16 app that connects to remote HTTP MCP servers, drafts SQL with structured AI output, validates SQL with a Postgres parser, and executes only approval-gated read-only queries.
+Natural QL is a Next.js 16 app that connects to remote HTTP MCP servers, drafts SQL with structured AI output, validates SQL with a Postgres parser, and executes only approval-gated read-only queries. The frontend is a conversational chat UI.
 
 ## Architecture
 
 ```text
-Browser UI
+Browser Chat UI
   |
-  | MCP endpoint + bearer token
+  | MCP endpoint + bearer token (via connect dialog)
   v
 app/api/mcp/connect/route.ts
   |
@@ -19,7 +19,7 @@ Remote MCP Server
   v
 Read-only database
 
-Question flow
+Question flow (chat message → API → chat response)
   |
   v
 app/api/query/draft/route.ts
@@ -34,28 +34,106 @@ lib/sql/validate-readonly.ts
   |
   | parser-backed SQL safety result
   v
-Approval UI
+Approval UI (SQL card in chat thread)
   |
   v
 app/api/query/execute/route.ts
   |
   | revalidate SQL, execute via allowed MCP query tool, explain results
   v
-Table + explanation
+Results card in chat thread
 ```
 
 ## Key Files
 
-- `components/analyst-workspace.tsx` — client-side connection, question, approval, and result UI.
-- `app/api/mcp/connect/route.ts` — remote MCP endpoint validation and schema snapshot loading.
-- `app/api/query/draft/route.ts` — structured SQL draft generation and validation preview.
-- `app/api/query/execute/route.ts` — approval-gated execution and result explanation.
+### Frontend Components
+
+- `components/chat/chat-shell.tsx` — Main orchestrator. Manages connection, conversation messages, and the ask → draft → approve → execute flow.
+- `components/chat/chat-header.tsx` — Header bar with brand logo and connection status pill.
+- `components/chat/chat-messages.tsx` — Scrollable message container with auto-scroll-to-bottom.
+- `components/chat/chat-input.tsx` — Auto-resizing textarea pinned to viewport bottom.
+- `components/chat/message.tsx` — Discriminated union renderer dispatching to role-specific sub-components.
+- `components/chat/greeting.tsx` — Empty state with suggested question cards.
+- `components/chat/connect-dialog.tsx` — Modal dialog for MCP connection settings.
+- `components/chat/sql-card.tsx` — SQL draft card: confidence badge, validation status, code block, expandable details, approve button.
+- `components/chat/results-card.tsx` — Results card: AI explanation, findings, caveats, collapsible data table.
+- `components/chat/icons.tsx` — SVG icon components (no external icon library).
+
+### Shared Utilities
+
+- `lib/utils.ts` — `cn()` for class merging, `postJson()` for API calls, `formatCell()` for table display.
+- `lib/types/chat.ts` — Discriminated union types for all chat message variants (`UserMessage`, `AssistantDraftMessage`, `AssistantResultMessage`, etc.).
+
+### Backend (unchanged from v1)
+
+- `app/api/mcp/connect/route.ts` — Remote MCP endpoint validation and schema snapshot loading.
+- `app/api/query/draft/route.ts` — Structured SQL draft generation and validation preview.
+- `app/api/query/execute/route.ts` — Approval-gated execution and result explanation.
 - `lib/mcp/validate-endpoint.ts` — HTTPS, DNS, private-network, redirect, and timeout guardrails.
 - `lib/mcp/tools.ts` — MCP SDK client wrapper, tool discovery, schema loading, and query execution.
-- `lib/sql/validate-readonly.ts` — parser-backed Postgres read-only validation.
+- `lib/sql/validate-readonly.ts` — Parser-backed Postgres read-only validation.
 - `lib/ai/draft-query.ts` — OpenAI structured output for SQL drafts.
 - `lib/ai/explain-results.ts` — OpenAI structured output for result explanations.
-- `lib/types/query.ts` — shared Zod schemas and TypeScript types.
+- `lib/types/query.ts` — Shared Zod schemas and TypeScript types.
+
+### App Shell
+
+- `app/layout.tsx` — Root layout with Inter font (via `next/font/google`) and full-height body.
+- `app/globals.css` — Design system: CSS custom properties (oklch colors), keyframe animations, scrollbar styling, dialog overlay utilities.
+- `app/page.tsx` — Renders `<ChatShell />`.
+
+## UI Component Architecture
+
+The chat UI follows a discriminated union pattern for message rendering:
+
+```text
+ChatShell (state orchestrator)
+├── ChatHeader (brand + connection status)
+├── ChatMessages (scrollable container)
+│   ├── Greeting (empty state, shown when messages = [])
+│   │   └── suggestion cards
+│   └── Message[] (rendered per message)
+│       ├── UserBubble (right-aligned dark bubble)
+│       ├── ThinkingIndicator (animated dots)
+│       ├── SqlCard (draft + approve)
+│       ├── ResultsCard (table + explanation)
+│       ├── SystemBubble (centered status pill)
+│       └── ErrorBubble (left-aligned warning)
+├── ChatInput (textarea + send/stop button)
+└── ConnectDialog (modal overlay, conditional)
+```
+
+### Message Type System
+
+All conversation state uses `ChatMessage` from `lib/types/chat.ts` — a discriminated union keyed on `role` and `type`:
+
+```ts
+type ChatMessage =
+  | { role: "user"; content: string }
+  | { role: "assistant"; type: "thinking" }
+  | { role: "assistant"; type: "draft"; draft: QueryDraft; safeSql: string }
+  | { role: "assistant"; type: "result"; result: QueryResult; explanation: ResultExplanation }
+  | { role: "assistant"; type: "error"; message: string }
+  | { role: "system"; content: string }
+```
+
+### Design System
+
+The CSS design system uses oklch color tokens defined as CSS custom properties. Key tokens:
+
+| Token | Purpose |
+|-------|---------|
+| `--background` | Page background |
+| `--foreground` | Primary text |
+| `--card` | Card/surface background |
+| `--muted` / `--muted-foreground` | Secondary surfaces/text |
+| `--border` | Borders |
+| `--primary` / `--primary-foreground` | Primary actions (buttons, user bubbles) |
+| `--success` | Connected state, validation passed |
+| `--warning` | Caveats, medium confidence |
+| `--destructive` | Errors, validation failures |
+
+Animation classes: `animate-message-in`, `animate-fade-in`, `animate-scale-in`, `thinking-dot`.
 
 ## Environment Variables
 
