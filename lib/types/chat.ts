@@ -1,0 +1,65 @@
+import type {
+  QueryDraft,
+  QueryResult,
+  ResultExplanation,
+} from "@/lib/types/query";
+
+/** Every message in the chat conversation. */
+export type ChatMessage =
+  | UserMessage
+  | AssistantDraftMessage
+  | AssistantResultMessage
+  | AssistantErrorMessage
+  | SystemMessage
+  | AssistantThinkingMessage;
+
+export type UserMessage = {
+  id: string;
+  role: "user";
+  content: string;
+};
+
+export type AssistantThinkingMessage = {
+  id: string;
+  role: "assistant";
+  type: "thinking";
+};
+
+export type AssistantDraftMessage = {
+  id: string;
+  role: "assistant";
+  type: "draft";
+  draft: QueryDraft;
+  safeSql: string;
+  validationError?: string;
+};
+
+export type AssistantResultMessage = {
+  id: string;
+  role: "assistant";
+  type: "result";
+  sql: string;
+  result: QueryResult;
+  explanation: ResultExplanation;
+  statusText: string;
+};
+
+export type AssistantErrorMessage = {
+  id: string;
+  role: "assistant";
+  type: "error";
+  message: string;
+};
+
+export type SystemMessage = {
+  id: string;
+  role: "system";
+  content: string;
+};
+
+let counter = 0;
+
+/** Generate a unique message ID. */
+export function createMessageId(): string {
+  return `msg-${Date.now()}-${++counter}`;
+}
