@@ -1,22 +1,17 @@
 "use client";
 
 import type { ChatMessage } from "@/lib/types/chat";
-import { cn } from "@/lib/utils";
 import {
   SparklesIcon,
   AlertTriangleIcon,
   DatabaseIcon,
 } from "./icons";
-import { SqlCard } from "./sql-card";
-import { ResultsCard } from "./results-card";
 
 type MessageProps = {
   message: ChatMessage;
-  onApprove: (sql: string) => void;
-  isPending: boolean;
 };
 
-export function Message({ message, onApprove, isPending }: MessageProps) {
+export function Message({ message }: MessageProps) {
   switch (message.role) {
     case "user":
       return <UserBubble content={message.content} />;
@@ -26,27 +21,12 @@ export function Message({ message, onApprove, isPending }: MessageProps) {
       switch (message.type) {
         case "thinking":
           return <ThinkingIndicator />;
-        case "draft":
+        case "text":
           return (
             <AssistantWrapper>
-              <SqlCard
-                draft={message.draft}
-                safeSql={message.safeSql}
-                validationError={message.validationError}
-                onApprove={onApprove}
-                isPending={isPending}
-              />
-            </AssistantWrapper>
-          );
-        case "result":
-          return (
-            <AssistantWrapper>
-              <ResultsCard
-                sql={message.sql}
-                result={message.result}
-                explanation={message.explanation}
-                statusText={message.statusText}
-              />
+              <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm">
+                {message.content}
+              </div>
             </AssistantWrapper>
           );
         case "error":

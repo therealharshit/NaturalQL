@@ -1,14 +1,7 @@
-import type {
-  QueryDraft,
-  QueryResult,
-  ResultExplanation,
-} from "@/lib/types/query";
-
 /** Every message in the chat conversation. */
 export type ChatMessage =
   | UserMessage
-  | AssistantDraftMessage
-  | AssistantResultMessage
+  | AssistantTextMessage
   | AssistantErrorMessage
   | SystemMessage
   | AssistantThinkingMessage;
@@ -25,23 +18,11 @@ export type AssistantThinkingMessage = {
   type: "thinking";
 };
 
-export type AssistantDraftMessage = {
+export type AssistantTextMessage = {
   id: string;
   role: "assistant";
-  type: "draft";
-  draft: QueryDraft;
-  safeSql: string;
-  validationError?: string;
-};
-
-export type AssistantResultMessage = {
-  id: string;
-  role: "assistant";
-  type: "result";
-  sql: string;
-  result: QueryResult;
-  explanation: ResultExplanation;
-  statusText: string;
+  type: "text";
+  content: string;
 };
 
 export type AssistantErrorMessage = {
