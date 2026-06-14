@@ -1,62 +1,51 @@
 # Natural QL
 
-Natural QL is a guarded MCP SQL copilot for real databases. A user connects a remote database MCP server, asks a business question in plain English, reviews the generated SQL, approves execution, and gets a table plus a plain-English explanation — all through a conversational chat interface.
+Natural QL is an AI-powered database query assistant. It allows users to connect any supported database (PostgreSQL, MySQL, or SQLite), ask questions in plain English, and receive SQL queries drafted by Google Gemini. After reviewing and approving the generated SQL, the query runs safely (read-only) and the results are presented alongside an AI-generated natural language summary and insights.
 
-The v1 product is intentionally narrow: remote HTTP MCP, Postgres-style read-only SQL, explicit user approval, and parser-backed guardrails.
+## Features
+
+- **Multi-Database Support**: Connect directly to PostgreSQL, MySQL, or SQLite databases.
+- **AI SQL Generation**: Converts plain English questions into database-specific SQL queries using Google Gemini.
+- **Safety & Guardrails**: 
+  - Validates SQL to ensure it is read-only (rejects write statements, DDL, multiple statements).
+  - Appends query limits to prevent overwhelming the client.
+- **User-in-the-Loop Approval**: Generated SQL must be reviewed and explicitly approved before execution.
+- **AI Result Explanations**: Explains the query results in simple language with key insights.
 
 ## Docs
 
-- [User guide](docs/user-guide.md) — how end users connect an MCP server, ask questions, approve SQL, and read results.
-- [Developer docs](docs/developer-docs.md) — architecture, UI components, API routes, guardrails, environment variables, testing, and implementation details.
+- [User Guide](docs/user-guide.md) — How to connect databases, run queries, and review results.
+- [Developer Docs](docs/developer-docs.md) — Architecture, components, API routes, and testing.
 
 ## Quick Start
 
+1. **Install Dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+2. **Configure Environment Variables**:
+   Create a `.env` file in the project root:
+   ```bash
+   GEMINI_API_KEY=your_gemini_api_key
+   # Optionally override the model (defaults to gemini-2.5-flash)
+   # GEMINI_MODEL=gemini-2.5-flash
+   ```
+
+3. **Start the Dev Server**:
+   ```bash
+   pnpm dev
+   ```
+   Open `http://localhost:3000` in your browser.
+
+## Running Tests
+
+We use Vitest for verifying SQL validation logic:
 ```bash
-pnpm install
-pnpm dev
+pnpm test
 ```
 
-Open `http://localhost:3000`.
-
-To draft and explain queries, configure:
-
+For TypeScript type checking:
 ```bash
-OPENAI_API_KEY=your_api_key
-OPENAI_MODEL=gpt-5.4-mini
+npx tsc --noEmit
 ```
-
-`OPENAI_MODEL` is optional. If unset, the app uses `gpt-5.4-mini`.
-
-## UI
-
-Natural QL uses a full-screen chat interface inspired by modern AI assistants:
-
-- **Chat input** at the bottom — type natural language questions.
-- **Message thread** in the center — user questions, AI-drafted SQL cards, approval buttons, and query results all appear in a conversational flow.
-- **Connection dialog** in the header — connect your MCP database server via a modal.
-- **Greeting screen** — suggested queries shown when no conversation has started.
-
-## Safety Model
-
-Natural QL does not trust model output. The backend validates every remote MCP endpoint and every SQL statement before execution.
-
-- Remote MCP endpoints must use HTTPS.
-- Hostnames are DNS-resolved and blocked if they point at localhost, private networks, link-local ranges, or cloud metadata IPs.
-- MCP redirects to blocked addresses are rejected.
-- SQL is parsed with a Postgres parser, not regex-only checks.
-- Only one read-only `SELECT` statement is allowed.
-- Mutations, DDL, transactions, stored procedures, temp table writes, and unsafe functions are blocked.
-- Query execution requires explicit user approval.
-
-## Scripts
-
-```bash
-pnpm dev       # start Next.js dev server
-pnpm lint      # run ESLint
-pnpm test      # run Vitest
-pnpm build     # production build
-```
-
-## Status
-
-This is an early v1 implementation. It is designed for real remote MCP database servers, but it is not yet a full multi-tenant SaaS. Authentication, account persistence, team workspaces, charts, saved metrics, and Playwright E2E coverage are intentionally deferred.
