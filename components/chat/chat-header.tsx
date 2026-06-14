@@ -5,11 +5,13 @@ import { DatabaseIcon, SparklesIcon } from "./icons";
 
 type ChatHeaderProps = {
   connected: boolean;
+  dbName?: string;
   onConnectClick: () => void;
 };
 
 export function ChatHeader({
   connected,
+  dbName,
   onConnectClick,
 }: ChatHeaderProps) {
   return (
@@ -43,7 +45,7 @@ export function ChatHeader({
         {connected ? (
           <>
             <DatabaseIcon size={12} />
-            Connected
+            {dbName || "Connected"}
           </>
         ) : (
           "Connect database"

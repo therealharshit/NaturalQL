@@ -6,12 +6,16 @@ import {
   AlertTriangleIcon,
   DatabaseIcon,
 } from "./icons";
+import { SqlCard } from "./sql-card";
+import { ResultsCard } from "./results-card";
 
 type MessageProps = {
   message: ChatMessage;
+  onApprove?: (sql: string) => void;
+  isApprovePending?: boolean;
 };
 
-export function Message({ message }: MessageProps) {
+export function Message({ message, onApprove, isApprovePending = false }: MessageProps) {
   switch (message.role) {
     case "user":
       return <UserBubble content={message.content} />;
@@ -27,6 +31,29 @@ export function Message({ message }: MessageProps) {
               <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm">
                 {message.content}
               </div>
+            </AssistantWrapper>
+          );
+        case "draft":
+          return (
+            <AssistantWrapper>
+              <SqlCard
+                draft={message.draft}
+                safeSql={message.safeSql}
+                validationError={message.validationError}
+                onApprove={onApprove ?? (() => {})}
+                isPending={isApprovePending}
+              />
+            </AssistantWrapper>
+          );
+        case "result":
+          return (
+            <AssistantWrapper>
+              <ResultsCard
+                sql={message.sql}
+                result={message.result}
+                explanation={message.explanation}
+                statusText={message.statusText}
+              />
             </AssistantWrapper>
           );
         case "error":
