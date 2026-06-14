@@ -1,11 +1,36 @@
 import { z } from "zod";
 
-export const McpConnectionSchema = z.object({
-  endpoint: z.string().url(),
-  token: z.string().optional(),
-});
+/* ── Database connection ── */
 
-export type McpConnection = z.infer<typeof McpConnectionSchema>;
+export const DbTypeSchema = z.enum(["postgresql", "mysql", "sqlite"]);
+export type DbType = z.infer<typeof DbTypeSchema>;
+
+export const DbConnectionSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("postgresql"),
+    host: z.string().min(1),
+    port: z.coerce.number().int().positive().default(5432),
+    user: z.string().min(1),
+    password: z.string().default(""),
+    database: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("mysql"),
+    host: z.string().min(1),
+    port: z.coerce.number().int().positive().default(3306),
+    user: z.string().min(1),
+    password: z.string().default(""),
+    database: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("sqlite"),
+    filepath: z.string().min(1),
+  }),
+]);
+
+export type DbConnection = z.infer<typeof DbConnectionSchema>;
+
+/* ── Schema introspection ── */
 
 export const TableColumnSchema = z.object({
   name: z.string(),
@@ -28,6 +53,8 @@ export const SchemaSnapshotSchema = z.object({
 
 export type SchemaSnapshot = z.infer<typeof SchemaSnapshotSchema>;
 
+/* ── AI draft ── */
+
 export const QueryDraftSchema = z.object({
   needsClarification: z.boolean(),
   clarifyingQuestion: z.string().nullable(),
@@ -41,6 +68,8 @@ export const QueryDraftSchema = z.object({
 
 export type QueryDraft = z.infer<typeof QueryDraftSchema>;
 
+/* ── Query results ── */
+
 export const QueryResultSchema = z.object({
   columns: z.array(z.string()),
   rows: z.array(z.record(z.string(), z.unknown())),
@@ -50,6 +79,8 @@ export const QueryResultSchema = z.object({
 
 export type QueryResult = z.infer<typeof QueryResultSchema>;
 
+/* ── Result explanation ── */
+
 export const ResultExplanationSchema = z.object({
   summary: z.string(),
   findings: z.array(z.string()),
@@ -58,11 +89,12 @@ export const ResultExplanationSchema = z.object({
 
 export type ResultExplanation = z.infer<typeof ResultExplanationSchema>;
 
+/* ── API response envelope ── */
+
 export type ApiErrorCode =
   | "INVALID_INPUT"
-  | "UNSAFE_ENDPOINT"
-  | "MCP_CONNECTION_FAILED"
-  | "MCP_TOOLS_UNAVAILABLE"
+  | "CONNECTION_FAILED"
+  | "INTROSPECTION_FAILED"
   | "AI_NOT_CONFIGURED"
   | "AI_DRAFT_FAILED"
   | "UNSAFE_SQL"
@@ -78,3 +110,21 @@ export type ApiError = {
 export type ApiSuccess<T> = T & { ok: true };
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+/* ── API request schemas ── */
+
+export const ConnectRequestSchema = z.object({
+  connection: DbConnectionSchema,
+});
+
+export const DraftRequestSchema = z.object({
+  connection: DbConnectionSchema,
+  question: z.string().min(1),
+  schema: SchemaSnapshotSchema,
+});
+
+export const ExecuteRequestSchema = z.object({
+  connection: DbConnectionSchema,
+  sql: z.string().min(1),
+  question: z.string().optional(),
+});
