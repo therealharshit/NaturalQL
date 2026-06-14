@@ -10,6 +10,7 @@ import {
   ChevronDownIcon,
   CopyIcon,
   TableIcon,
+  EditIcon,
 } from "./icons";
 
 type SqlCardProps = {
@@ -29,6 +30,8 @@ export function SqlCard({
 }: SqlCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedSql, setEditedSql] = useState(safeSql || draft.sql || "");
 
   const confidencePercent = Math.round(draft.confidence * 100);
   const confidenceColor =
@@ -39,8 +42,7 @@ export function SqlCard({
         : "text-destructive";
 
   const handleCopy = () => {
-    const sql = safeSql || draft.sql || "";
-    navigator.clipboard.writeText(sql);
+    navigator.clipboard.writeText(editedSql);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -90,21 +92,54 @@ export function SqlCard({
             </span>
           ) : null}
         </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          title="Copy SQL"
-        >
-          <CopyIcon size={12} />
-          {copied ? "Copied" : "Copy"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (isEditing) {
+                setEditedSql(safeSql || draft.sql || "");
+              }
+              setIsEditing(!isEditing);
+            }}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs transition-colors",
+              isEditing
+                ? "bg-accent text-foreground hover:bg-accent/80"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            )}
+            title={isEditing ? "Cancel Edit" : "Edit SQL"}
+          >
+            <EditIcon size={12} />
+            {isEditing ? "Cancel" : "Edit"}
+          </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            title="Copy SQL"
+          >
+            <CopyIcon size={12} />
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
       </div>
 
       {/* SQL block */}
       <div className="px-2 py-2">
-        <pre className="!m-0 !rounded-xl !bg-[oklch(0.155_0_0)] !px-4 !py-3.5 text-[0.8125rem] leading-relaxed !text-[oklch(0.88_0.05_85)]">
-          {displaySql}
-        </pre>
+        {isEditing ? (
+          <textarea
+            value={editedSql}
+            onChange={(e) => setEditedSql(e.target.value)}
+            className="w-full min-h-[120px] rounded-xl border border-border bg-[oklch(0.155_0_0)] px-4 py-3.5 font-mono text-[0.8125rem] leading-relaxed text-[oklch(0.88_0.05_85)] outline-none focus:border-ring focus:ring-1 focus:ring-ring/20 resize-y"
+            placeholder="Enter SQL query..."
+            spellCheck={false}
+            autoFocus
+          />
+        ) : (
+          <pre className="!m-0 !rounded-xl !bg-[oklch(0.155_0_0)] !px-4 !py-3.5 text-[0.8125rem] leading-relaxed !text-[oklch(0.88_0.05_85)] overflow-x-auto">
+            {editedSql || displaySql}
+          </pre>
+        )}
       </div>
 
       {/* Details accordion */}
@@ -170,10 +205,10 @@ export function SqlCard({
       )}
 
       {/* Approve button */}
-      {safeSql && (
+      {editedSql.trim().length > 0 && (
         <div className="border-t border-border px-5 py-3.5">
           <button
-            onClick={() => onApprove(safeSql)}
+            onClick={() => onApprove(editedSql)}
             disabled={isPending}
             className={cn(
               "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all",
@@ -183,7 +218,7 @@ export function SqlCard({
             )}
           >
             <PlayIcon size={14} />
-            Approve &amp; Run
+            {isEditing || editedSql !== (safeSql || draft.sql) ? "Run Edited SQL" : "Approve & Run"}
           </button>
         </div>
       )}
