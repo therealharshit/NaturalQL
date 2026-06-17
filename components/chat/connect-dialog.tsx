@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import type { DbConnection, DbType } from "@/lib/types/query";
 import { XIcon, PlugIcon, LoaderIcon } from "./icons";
@@ -24,6 +25,7 @@ export function ConnectDialog({
   isPending,
   error,
 }: ConnectDialogProps) {
+  const [mounted, setMounted] = useState(false);
   const [dbType, setDbType] = useState<DbType>("postgresql");
   const [host, setHost] = useState("");
   const [port, setPort] = useState("5432");
@@ -31,6 +33,10 @@ export function ConnectDialog({
   const [password, setPassword] = useState("");
   const [database, setDatabase] = useState("");
   const [filepath, setFilepath] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isSqlite = dbType === "sqlite";
 
@@ -64,7 +70,9 @@ export function ConnectDialog({
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div className="dialog-overlay" onClick={onClose} />
@@ -241,6 +249,7 @@ export function ConnectDialog({
           </p>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

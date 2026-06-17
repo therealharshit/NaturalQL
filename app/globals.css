@@ -181,7 +181,7 @@ code {
   inset: 0;
   background: oklch(0 0 0 / 0.4);
   backdrop-filter: blur(4px);
-  animation: fade-in 0.15s ease-out;
+  animation: fade-in 0.15s ease-out both;
   z-index: 60;
 }
 
@@ -202,7 +202,7 @@ code {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 61;
-  animation: dialog-scale-in 0.2s ease-out;
+  animation: dialog-scale-in 0.2s ease-out both;
 }
 
 /* ── sidebar ── */
