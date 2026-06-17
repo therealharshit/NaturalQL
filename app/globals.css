@@ -193,3 +193,50 @@ code {
   z-index: 51;
   animation: scale-in 0.2s ease-out;
 }
+
+/* ── sidebar ── */
+@keyframes sidebar-slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes sidebar-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
+}
+
+.sidebar-panel {
+  transition: width 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.sidebar-open {
+  animation: sidebar-slide-in 0.2s ease-out both;
+}
+
+.sidebar-closed {
+  transform: translateX(-100%);
+  position: absolute;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .sidebar-closed {
+    position: relative;
+    transform: translateX(0);
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+    border: none;
+    pointer-events: auto;
+  }
+
+  .sidebar-open {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+.sidebar-backdrop {
+  animation: fade-in 0.15s ease-out;
+}
+

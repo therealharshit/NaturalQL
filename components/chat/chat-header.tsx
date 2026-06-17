@@ -1,32 +1,43 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { DatabaseIcon, SparklesIcon } from "./icons";
+import { DatabaseIcon, SparklesIcon, PanelLeftIcon } from "./icons";
 
 type ChatHeaderProps = {
   connected: boolean;
   dbName?: string;
   onConnectClick: () => void;
+  onToggleSidebar: () => void;
 };
 
 export function ChatHeader({
   connected,
   dbName,
   onConnectClick,
+  onToggleSidebar,
 }: ChatHeaderProps) {
   return (
     <header className="flex items-center justify-between border-b border-border bg-card/80 px-4 py-3 backdrop-blur-sm sm:px-6">
-      {/* Brand */}
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <SparklesIcon size={16} />
+      {/* Left: sidebar toggle + brand */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onToggleSidebar}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          aria-label="Toggle sidebar"
+        >
+          <PanelLeftIcon size={18} />
+        </button>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <SparklesIcon size={16} />
+          </div>
+          <span className="text-sm font-semibold tracking-tight text-foreground">
+            Natural QL
+          </span>
         </div>
-        <span className="text-sm font-semibold tracking-tight text-foreground">
-          Natural QL
-        </span>
       </div>
 
-      {/* Connection status */}
+      {/* Right: connection status */}
       <button
         onClick={onConnectClick}
         className={cn(

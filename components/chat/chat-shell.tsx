@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ChatMessage as ChatMsg,
   createMessageId,
@@ -13,12 +13,14 @@ import type {
   ResultExplanation,
 } from "@/lib/types/query";
 import { postJson } from "@/lib/utils";
+import { useChatHistory } from "@/lib/hooks/use-chat-history";
 import { ChatHeader } from "./chat-header";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
 import { Greeting } from "./greeting";
 import { ConnectDialog } from "./connect-dialog";
 import { Message } from "./message";
+import { Sidebar } from "./sidebar";
 
 type ConnectResponse = {
   ok: boolean;
@@ -48,6 +50,21 @@ type ExecuteResponse = {
 };
 
 export function ChatShell() {
+  /* ── Chat history (multi-conversation) ── */
+  const {
+    conversations,
+    activeId,
+    activeConversation,
+    createChat,
+    switchChat,
+    deleteChat,
+    updateMessages,
+    updateDbName,
+  } = useChatHistory();
+
+  /* Sidebar state */
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   /* Connection state */
   const [connected, setConnected] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
@@ -60,7 +77,7 @@ export function ChatShell() {
   const schemaRef = useRef<SchemaSnapshot | null>(null);
 
   /* Conversation state */
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const messages = activeConversation.messages;
   const [question, setQuestion] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [approvePending, setApprovePending] = useState(false);
@@ -68,44 +85,62 @@ export function ChatShell() {
   /* Track current question for execute context */
   const lastQuestionRef = useRef("");
 
-  /* ── Connect ── */
-  const handleConnect = useCallback(async (connection: DbConnection) => {
-    setConnectPending(true);
-    setConnectError(undefined);
-
-    try {
-      const resp = await postJson<ConnectResponse>("/api/connect", {
-        connection,
-      });
-
-      if (!resp.ok) {
-        setConnectError(resp.message ?? "Connection failed.");
-        setConnectPending(false);
-        return;
+  /* Helper: set messages and persist to history */
+  const setMessages = useCallback(
+    (updater: ChatMsg[] | ((prev: ChatMsg[]) => ChatMsg[])) => {
+      if (typeof updater === "function") {
+        const next = updater(activeConversation.messages);
+        updateMessages(next);
+      } else {
+        updateMessages(updater);
       }
+    },
+    [activeConversation.messages, updateMessages],
+  );
 
-      connectionRef.current = connection;
-      schemaRef.current = resp.schema!;
-      setDbName(resp.database ?? "database");
-      setConnected(true);
-      setConnectOpen(false);
+  /* ── Connect ── */
+  const handleConnect = useCallback(
+    async (connection: DbConnection) => {
+      setConnectPending(true);
+      setConnectError(undefined);
 
-      const tableCount = resp.schema?.tables.length ?? 0;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: createMessageId(),
-          role: "system",
-          content: `Connected to ${resp.database} (${resp.dbType}) · ${tableCount} table${tableCount !== 1 ? "s" : ""} found`,
-        },
-      ]);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Connection failed.";
-      setConnectError(msg);
-    } finally {
-      setConnectPending(false);
-    }
-  }, []);
+      try {
+        const resp = await postJson<ConnectResponse>("/api/connect", {
+          connection,
+        });
+
+        if (!resp.ok) {
+          setConnectError(resp.message ?? "Connection failed.");
+          setConnectPending(false);
+          return;
+        }
+
+        connectionRef.current = connection;
+        schemaRef.current = resp.schema!;
+        const name = resp.database ?? "database";
+        setDbName(name);
+        setConnected(true);
+        setConnectOpen(false);
+        updateDbName(name);
+
+        const tableCount = resp.schema?.tables.length ?? 0;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: createMessageId(),
+            role: "system",
+            content: `Connected to ${resp.database} (${resp.dbType}) · ${tableCount} table${tableCount !== 1 ? "s" : ""} found`,
+          },
+        ]);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Connection failed.";
+        setConnectError(msg);
+      } finally {
+        setConnectPending(false);
+      }
+    },
+    [setMessages, updateDbName],
+  );
 
   /* ── Ask a question ── */
   const handleAsk = useCallback(
@@ -135,7 +170,7 @@ export function ChatShell() {
               role: "assistant",
               type: "error",
               message:
-                "Connect to a database first. Click the connection button in the header.",
+                "Connect to a database first. Click the connection button in the sidebar.",
             }),
         );
         return;
@@ -193,7 +228,7 @@ export function ChatShell() {
         setIsPending(false);
       }
     },
-    [question, connected],
+    [question, connected, setMessages],
   );
 
   /* ── Approve & Run SQL ── */
@@ -260,7 +295,7 @@ export function ChatShell() {
         setApprovePending(false);
       }
     },
-    [],
+    [setMessages],
   );
 
   /* ── Suggested action click ── */
@@ -271,53 +306,77 @@ export function ChatShell() {
     [handleAsk],
   );
 
+  /* ── New chat handler ── */
+  const handleNewChat = useCallback(() => {
+    createChat();
+    setQuestion("");
+  }, [createChat]);
+
   return (
-    <div className="flex h-full flex-col">
-      <ChatHeader
+    <div className="flex h-full">
+      {/* Sidebar */}
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        conversations={conversations}
+        activeId={activeId}
+        onNewChat={handleNewChat}
+        onSelectChat={switchChat}
+        onDeleteChat={deleteChat}
+        onConnectClick={() => setConnectOpen(true)}
         connected={connected}
         dbName={dbName}
-        onConnectClick={() => setConnectOpen(true)}
       />
 
-      <ChatMessages>
-        {messages.length === 0 ? (
-          <Greeting onSuggestionClick={handleSuggestion} />
-        ) : (
-          messages.map((msg) => (
-            <Message
-              key={msg.id}
-              message={msg}
-              onApprove={handleApprove}
-              isApprovePending={approvePending}
-            />
-          ))
-        )}
-      </ChatMessages>
-
-      <ChatInput
-        value={question}
-        onChange={setQuestion}
-        onSubmit={() => handleAsk()}
-        disabled={false}
-        isPending={isPending}
-        placeholder={
-          connected
-            ? "Ask a question about your data..."
-            : "Connect a database first, then ask away..."
-        }
-      />
-
-      {connectOpen && (
-        <ConnectDialog
-          onConnect={handleConnect}
-          onClose={() => {
-            setConnectOpen(false);
-            setConnectError(undefined);
-          }}
-          isPending={connectPending}
-          error={connectError}
+      {/* Main chat area */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <ChatHeader
+          connected={connected}
+          dbName={dbName}
+          onConnectClick={() => setConnectOpen(true)}
+          onToggleSidebar={() => setSidebarOpen((o) => !o)}
         />
-      )}
+
+        <ChatMessages>
+          {messages.length === 0 ? (
+            <Greeting onSuggestionClick={handleSuggestion} />
+          ) : (
+            messages.map((msg) => (
+              <Message
+                key={msg.id}
+                message={msg}
+                onApprove={handleApprove}
+                isApprovePending={approvePending}
+              />
+            ))
+          )}
+        </ChatMessages>
+
+        <ChatInput
+          value={question}
+          onChange={setQuestion}
+          onSubmit={() => handleAsk()}
+          disabled={false}
+          isPending={isPending}
+          placeholder={
+            connected
+              ? "Ask a question about your data..."
+              : "Connect a database first, then ask away..."
+          }
+        />
+
+        {connectOpen && (
+          <ConnectDialog
+            onConnect={handleConnect}
+            onClose={() => {
+              setConnectOpen(false);
+              setConnectError(undefined);
+            }}
+            isPending={connectPending}
+            error={connectError}
+          />
+        )}
+      </div>
     </div>
   );
 }
