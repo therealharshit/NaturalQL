@@ -22,6 +22,7 @@ type SidebarProps = {
   onConnectClick: () => void;
   connected: boolean;
   dbName?: string;
+  hydrated: boolean;
 };
 
 /* ── Date grouping helpers ── */
@@ -71,6 +72,7 @@ export function Sidebar({
   onConnectClick,
   connected,
   dbName,
+  hydrated,
 }: SidebarProps) {
   const grouped = groupConversations(conversations);
 
@@ -137,7 +139,15 @@ export function Sidebar({
 
         {/* Chat history list */}
         <nav className="scrollbar-thin flex-1 overflow-y-auto px-2 py-2">
-          {grouped.length === 0 ? (
+          {!hydrated ? (
+            <div className="space-y-4 px-3 py-4">
+              <div className="space-y-2">
+                <div className="h-3 w-16 animate-pulse rounded bg-muted-foreground/10" />
+                <div className="h-9 w-full animate-pulse rounded-lg bg-muted-foreground/5" />
+                <div className="h-9 w-full animate-pulse rounded-lg bg-muted-foreground/5" />
+              </div>
+            </div>
+          ) : conversations.length === 0 ? (
             <p className="px-3 py-6 text-center text-xs text-muted-foreground">
               No conversations yet
             </p>

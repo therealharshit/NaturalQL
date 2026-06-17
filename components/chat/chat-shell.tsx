@@ -60,6 +60,7 @@ export function ChatShell() {
     deleteChat,
     updateMessages,
     updateDbName,
+    hydrated,
   } = useChatHistory();
 
   /* Sidebar state */
@@ -326,6 +327,7 @@ export function ChatShell() {
         onConnectClick={() => setConnectOpen(true)}
         connected={connected}
         dbName={dbName}
+        hydrated={hydrated}
       />
 
       {/* Main chat area */}

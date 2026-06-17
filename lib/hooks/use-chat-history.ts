@@ -94,7 +94,21 @@ export function useChatHistory() {
   useEffect(() => {
     const stored = loadFromStorage();
     if (stored) {
-      setState(stored);
+      const first = stored.conversations[0];
+      if (first && first.messages.length === 0) {
+        // If the latest chat is already empty, reuse it
+        setState({
+          conversations: stored.conversations,
+          activeId: first.id,
+        });
+      } else {
+        // Otherwise, prepend a new empty conversation for a fresh window
+        const newConv = createEmptyConversation();
+        setState({
+          conversations: [newConv, ...stored.conversations],
+          activeId: newConv.id,
+        });
+      }
     } else {
       /* No stored data — create a real conversation with a proper ID */
       const conv = createEmptyConversation();
@@ -105,7 +119,7 @@ export function useChatHistory() {
 
   /* Persist on every state change (skip the initial SSR placeholder) */
   useEffect(() => {
-    if (hydrated) {
+    if (hydrated && state.activeId !== "conv-initial") {
       saveToStorage(state);
     }
   }, [state, hydrated]);
@@ -175,5 +189,6 @@ export function useChatHistory() {
     deleteChat,
     updateMessages,
     updateDbName,
+    hydrated,
   };
 }
