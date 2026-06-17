@@ -2,6 +2,11 @@
 
 Natural QL is an AI-powered database query assistant. It allows users to connect any supported database (PostgreSQL, MySQL, or SQLite), ask questions in plain English, and receive SQL queries drafted by Google Gemini. After reviewing and approving the generated SQL, the query runs safely (read-only) and the results are presented alongside an AI-generated natural language summary and insights.
 
+# Project Demo
+<p align="center">
+  <img src="./natural-ql.gif" alt="NaturalQ demo" width="800" />
+</p>
+
 ## Features
 
 - **Multi-Database Support**: Connect directly to PostgreSQL, MySQL, or SQLite databases.
