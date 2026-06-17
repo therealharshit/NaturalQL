@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ChatMessage } from "@/lib/types/chat";
 
 /* ── Types ── */
@@ -45,11 +45,21 @@ function createEmptyConversation(): Conversation {
   };
 }
 
-function loadFromStorage(): ChatHistoryState {
-  if (typeof window === "undefined") {
-    const conv = createEmptyConversation();
-    return { conversations: [conv], activeId: conv.id };
-  }
+/** Stable initial state used for SSR — no randomness, no Date.now(). */
+const SSR_INITIAL: ChatHistoryState = {
+  conversations: [
+    {
+      id: "conv-initial",
+      title: "New Chat",
+      messages: [],
+      createdAt: 0,
+    },
+  ],
+  activeId: "conv-initial",
+};
+
+function loadFromStorage(): ChatHistoryState | null {
+  if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -61,8 +71,7 @@ function loadFromStorage(): ChatHistoryState {
   } catch {
     /* corrupted storage, start fresh */
   }
-  const conv = createEmptyConversation();
-  return { conversations: [conv], activeId: conv.id };
+  return null;
 }
 
 function saveToStorage(state: ChatHistoryState): void {
@@ -77,15 +86,29 @@ function saveToStorage(state: ChatHistoryState): void {
 /* ── Hook ── */
 
 export function useChatHistory() {
-  const [state, setState] = useState<ChatHistoryState>(loadFromStorage);
+  /* Start with a stable default so server and client HTML match */
+  const [state, setState] = useState<ChatHistoryState>(SSR_INITIAL);
+  const [hydrated, setHydrated] = useState(false);
 
-  /* Persist on every state change */
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
+  /* After mount, load from localStorage (client-only) */
   useEffect(() => {
-    saveToStorage(stateRef.current);
-  }, [state]);
+    const stored = loadFromStorage();
+    if (stored) {
+      setState(stored);
+    } else {
+      /* No stored data — create a real conversation with a proper ID */
+      const conv = createEmptyConversation();
+      setState({ conversations: [conv], activeId: conv.id });
+    }
+    setHydrated(true);
+  }, []);
+
+  /* Persist on every state change (skip the initial SSR placeholder) */
+  useEffect(() => {
+    if (hydrated) {
+      saveToStorage(state);
+    }
+  }, [state, hydrated]);
 
   /* Active conversation accessor */
   const activeConversation =
