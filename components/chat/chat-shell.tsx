@@ -87,17 +87,7 @@ export function ChatShell() {
   const lastQuestionRef = useRef("");
 
   /* Helper: set messages and persist to history */
-  const setMessages = useCallback(
-    (updater: ChatMsg[] | ((prev: ChatMsg[]) => ChatMsg[])) => {
-      if (typeof updater === "function") {
-        const next = updater(activeConversation.messages);
-        updateMessages(next);
-      } else {
-        updateMessages(updater);
-      }
-    },
-    [activeConversation.messages, updateMessages],
-  );
+  const setMessages = updateMessages;
 
   /* ── Connect ── */
   const handleConnect = useCallback(

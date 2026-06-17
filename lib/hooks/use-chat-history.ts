@@ -159,16 +159,31 @@ export function useChatHistory() {
   }, []);
 
   /* Update messages for the active conversation */
-  const updateMessages = useCallback((messages: ChatMessage[]) => {
-    setState((prev) => ({
-      ...prev,
-      conversations: prev.conversations.map((c) =>
-        c.id === prev.activeId
-          ? { ...c, messages, title: deriveTitle(messages) || c.title }
-          : c,
-      ),
-    }));
-  }, []);
+  const updateMessages = useCallback(
+    (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      setState((prev) => {
+        const active = prev.conversations.find((c) => c.id === prev.activeId);
+        if (!active) return prev;
+
+        const nextMessages =
+          typeof updater === "function" ? updater(active.messages) : updater;
+
+        return {
+          ...prev,
+          conversations: prev.conversations.map((c) =>
+            c.id === prev.activeId
+              ? {
+                  ...c,
+                  messages: nextMessages,
+                  title: deriveTitle(nextMessages) || c.title,
+                }
+              : c,
+          ),
+        };
+      });
+    },
+    [],
+  );
 
   /* Update dbName for the active conversation */
   const updateDbName = useCallback((dbName: string) => {
