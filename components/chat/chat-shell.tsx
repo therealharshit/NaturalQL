@@ -63,7 +63,7 @@ export function ChatShell() {
   } = useChatHistory();
 
   /* Sidebar state */
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   /* Connection state */
   const [connected, setConnected] = useState(false);

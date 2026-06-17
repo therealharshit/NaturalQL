@@ -182,7 +182,18 @@ code {
   background: oklch(0 0 0 / 0.4);
   backdrop-filter: blur(4px);
   animation: fade-in 0.15s ease-out;
-  z-index: 50;
+  z-index: 60;
+}
+
+@keyframes dialog-scale-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .dialog-content {
@@ -190,8 +201,8 @@ code {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 51;
-  animation: scale-in 0.2s ease-out;
+  z-index: 61;
+  animation: dialog-scale-in 0.2s ease-out;
 }
 
 /* ── sidebar ── */
@@ -220,13 +231,13 @@ code {
 }
 
 @media (min-width: 768px) {
-  .sidebar-closed {
+  .sidebar-panel.sidebar-closed {
     position: relative;
     transform: translateX(0);
-    width: 0;
-    min-width: 0;
+    width: 0 !important;
+    min-width: 0 !important;
     overflow: hidden;
-    border: none;
+    border: none !important;
     pointer-events: auto;
   }
 
