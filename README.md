@@ -1,11 +1,13 @@
 # Natural QL
 
-Natural QL is an AI-powered database query assistant. It allows users to connect any supported database (PostgreSQL, MySQL, or SQLite), ask questions in plain English, and receive SQL queries drafted by Google Gemini. After reviewing and approving the generated SQL, the query runs safely (read-only) and the results are presented alongside an AI-generated natural language summary and insights.
+Natural QL is an AI database agent. It allows users to connect any supported database (PostgreSQL, MySQL, or SQLite), ask questions in plain English, and receive SQL queries drafted by Google Gemini. After reviewing and approving the generated SQL, the query runs safely (read-only) and the results are presented alongside an AI-generated natural language summary and insights.
 
 # Project Demo
 <p align="center">
   <img src="./natural-ql.gif" alt="NaturalQ demo" width="800" />
 </p>
+
+**[Watch Full Video](https://youtu.be/FIOenBWCaoA)** See NaturalQL in action
 
 ## Features
 
@@ -54,3 +56,9 @@ For TypeScript type checking:
 ```bash
 npx tsc --noEmit
 ```
+
+---
+
+## License
+
+MIT © 2026 Harshit Verma. See [LICENSE](LICENSE) for details.
