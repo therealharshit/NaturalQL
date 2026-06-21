@@ -51,7 +51,7 @@ export function Greeting({ onSuggestionClick }: GreetingProps) {
         className="animate-fade-in mt-3 max-w-md text-center text-muted-foreground"
         style={{ animationDelay: "0.3s" }}
       >
-        Connect a remote MCP database server, ask questions in plain English,
+        Connect to a database, ask questions in plain English,
         and get validated SQL with results.
       </p>
 
