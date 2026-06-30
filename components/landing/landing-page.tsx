@@ -7,6 +7,7 @@ import {
   TableIcon,
   CheckIcon,
   PlayIcon,
+  SendIcon,
 } from "@/components/chat/icons";
 import { Reveal } from "./reveal";
 
@@ -175,9 +176,17 @@ export function LandingPage() {
           >
             <Link
               href="/app"
-              className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-foreground/10 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/40"
             >
-              Get started
+              <span
+                aria-hidden
+                className="animate-badge-sheen pointer-events-none absolute inset-y-0 -left-12 w-12 bg-primary-foreground/20 blur-md"
+              />
+              <span className="relative">Get started</span>
+              <SendIcon
+                size={17}
+                className="relative transition-transform duration-200 group-hover:translate-x-1"
+              />
             </Link>
           </div>
 
