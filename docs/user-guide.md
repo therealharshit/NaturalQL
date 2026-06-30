@@ -1,51 +1,82 @@
 # Natural QL User Guide
 
-Natural QL lets you ask questions about your database without writing SQL. It connects directly to your PostgreSQL, MySQL, or SQLite database, drafts a read-only SQL query using Gemini AI, shows you the query for review, and runs it after you approve.
+Welcome! This guide walks you through using Natural QL from start to finish. No SQL knowledge required - that's the whole point. You ask questions in plain English, and Natural QL handles the database part.
 
-## Setup & Configuration
+Here's the journey you'll take:
 
-Before running Natural QL, ensure you have a Google Gemini API key configured:
+```mermaid
+flowchart LR
+    A["1. Connect<br/>your database"] --> B["2. Ask<br/>in plain English"]
+    B --> C["3. Review<br/>the SQL it wrote"]
+    C --> D["4. Approve<br/>and run"]
+    D --> E["5. Read<br/>the answer"]
+```
+
+## Before you start
+
+You need one thing: a **Google Gemini API key** (it's what writes the SQL and explains your results). It's free to get from [Google AI Studio](https://aistudio.google.com/apikey).
+
+Put it in a `.env` file in the project root:
 ```bash
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Start the application:
+Then start the app:
 ```bash
 pnpm dev
 ```
-Open `http://localhost:3000` in your web browser.
+Open `http://localhost:3000/app` in your browser. That's the chat workspace where everything happens.
 
-## Connecting a Database
+## Step 1: Connect a database
 
-1. Click the **Connect Database** button in the top-right of the header.
-2. Select your database type from the tab selector:
-   - **PostgreSQL**: Enter the host, port (default 5432), user, password, and database name.
-   - **MySQL**: Enter the host, port (default 3306), user, password, and database name.
-   - **SQLite**: Enter the absolute filesystem path to your SQLite database file.
-3. Click **Connect**. The system will introspect the database to discover tables and columns, then save the schema snapshot locally in your browser session.
+Click **Connect Database** in the top-right of the header. A dialog opens with three tabs:
 
-## Asking Questions
+| Database | What to enter |
+|----------|---------------|
+| **PostgreSQL** | Host, port (default `5432`), user, password, and database name |
+| **MySQL** | Host, port (default `3306`), user, password, and database name |
+| **SQLite** | The full path to your `.db` file on disk |
 
-Type your question in natural language in the chat input at the bottom of the screen. Examples:
-- "Show me the top 5 customers by revenue"
-- "How many active users signed up in the last month?"
-- "What is the average price of products?"
+Click **Connect**. Natural QL takes a quick look at your database to learn its tables and columns (this is called *introspection*), then keeps that map in your browser for the session. Your password is never stored on a server.
 
-You can also click one of the suggested query cards on the greeting screen to pre-fill a question.
+> **Tip:** Don't have a database handy? A local SQLite file is the fastest way to try it. Point the SQLite tab at any `.db` file.
 
-## Reviewing & Running SQL
+## Step 2: Ask a question
 
-When you submit a question:
-1. Gemini AI drafts a SQL query tailored to your database dialect and schema.
-2. A **SQL Card** appears in the chat containing:
-   - **Confidence Score**: How confident the model is in its query.
-   - **SQL Preview**: The drafted query syntax.
-   - **Validation Status**: A green "Validated" badge means it passed read-only and safety checks.
-   - **Details Accordion**: Collapsible list of referenced tables, assumptions, and caveats.
-3. Click **Approve & Run** to execute the query.
+Type a question in the box at the bottom, the way you'd ask a coworker:
 
-## Viewing Results
+- *"Show me the top 5 customers by revenue"*
+- *"How many users signed up in the last month?"*
+- *"What's the average price of products?"*
 
-Once approved and executed, a **Results Card** is shown in the chat:
-1. **AI Explanation**: A plain-English summary of what the data shows, key insights, and potential caveats.
-2. **Data Table**: A collapsible table displaying the raw query results (capped at 100 rows for safety and performance).
+In a hurry? The welcome screen has **starter query** cards you can click to fill in a question for you.
+
+## Step 3: Review the SQL
+
+Natural QL doesn't just run off and query your data. It drafts the SQL and shows it to you in a **SQL card** so you stay in control:
+
+- **Confidence score**: how sure the AI is that its query matches your question.
+- **The SQL itself**: the exact query it wrote, in your database's dialect.
+- **A "Validated" badge**: green means the query passed the read-only safety checks. (If something looks unsafe, you'll see why instead.)
+- **Details**: expand this to see which tables it used, any assumptions it made, and caveats worth knowing.
+
+Not quite right? You can **edit the SQL** directly in the card before running it.
+
+## Step 4: Approve and run
+
+When you're happy, click **Approve & Run**. This is the moment you're in charge of: nothing touches your database until you press it. The query runs **read-only**, so it can only ever read data, never change it.
+
+## Step 5: Read the answer
+
+You get back a **results card** with two parts:
+
+1. **A plain-English explanation**: a short summary of what the data shows, the key takeaways, and any caveats. This is the part that turns rows into an actual answer.
+2. **The data table**: the raw results, collapsible, capped at 100 rows so big queries stay manageable.
+
+That's it. Ask a follow-up question any time, or start a **New Chat** from the sidebar to begin fresh. Your past conversations are saved in your browser so you can jump back to them later.
+
+## A few good-to-knows
+
+- **It only reads.** Even if you ask it to delete or change something, the safety layer blocks it. Natural QL is a read-only tool by design.
+- **100-row cap.** Results are limited to 100 rows. Ask a more specific question (or add your own `LIMIT`) if you need a narrower slice.
+- **Nothing leaves your browser** except the query and schema needed to answer your question. Credentials stay local to your session.
