@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Natural QL",
-  description: "Ask real databases questions through a guarded MCP SQL copilot.",
+  description: "An AI database agent. Ask real databases questions in plain English. Read-only and approval-gated.",
 };
 
 export default function RootLayout({
