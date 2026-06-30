@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import {
   SparklesIcon,
   DatabaseIcon,
@@ -7,6 +8,7 @@ import {
   CheckIcon,
   PlayIcon,
 } from "@/components/chat/icons";
+import { Reveal } from "./reveal";
 
 const GITHUB_URL = "https://github.com/therealharshit/NaturalQL";
 const DEMO_URL = "https://youtu.be/FIOenBWCaoA";
@@ -111,7 +113,7 @@ export function LandingPage() {
           </nav>
           <Link
             href="/app"
-            className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg"
           >
             Open app
           </Link>
@@ -120,64 +122,89 @@ export function LandingPage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="mx-auto flex max-w-5xl flex-col items-center px-6 pb-20 pt-40 text-center">
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+        <section className="relative mx-auto flex max-w-5xl flex-col items-center px-6 pb-20 pt-40 text-center">
+          {/* soft glow behind the headline */}
+          <div
+            aria-hidden
+            className="animate-glow pointer-events-none absolute left-1/2 top-44 -z-10 h-72 w-[36rem] max-w-[90vw] -translate-x-1/2 rounded-full bg-foreground/10 blur-3xl"
+          />
+          <span
+            className="animate-rise mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground"
+            style={{ "--delay": "0ms" } as CSSProperties}
+          >
             <SparklesIcon size={13} />
             AI database agent
           </span>
-          <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
+          <h1
+            className="animate-rise max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl"
+            style={{ "--delay": "80ms" } as CSSProperties}
+          >
             Ask your database anything
           </h1>
-          <p className="mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
+          <p
+            className="animate-rise mt-6 max-w-2xl text-balance text-lg text-muted-foreground"
+            style={{ "--delay": "160ms" } as CSSProperties}
+          >
             Connect Postgres, MySQL, or SQLite and ask questions in plain English.
             Natural QL drafts validated, read-only SQL with AI, and nothing runs
             until you approve it.
           </p>
-          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
+          <div
+            className="animate-rise mt-9 flex flex-col items-center gap-3 sm:flex-row"
+            style={{ "--delay": "240ms" } as CSSProperties}
+          >
             <Link
               href="/app"
-              className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg"
             >
               Get started
             </Link>
           </div>
 
           {/* ── Product preview ── */}
-          <div className="mt-16 w-full max-w-4xl overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
-            <div className="flex items-center gap-1.5 border-b border-border px-5 py-3.5">
-              <span className="h-3 w-3 rounded-full bg-muted" />
-              <span className="h-3 w-3 rounded-full bg-muted" />
-              <span className="h-3 w-3 rounded-full bg-muted" />
-              <span className="ml-3 text-xs text-muted-foreground">Natural QL</span>
+          <div
+            className="animate-rise mt-16 w-full max-w-4xl"
+            style={{ "--delay": "340ms" } as CSSProperties}
+          >
+            <div className="animate-float overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
+              <div className="flex items-center gap-1.5 border-b border-border px-5 py-3.5">
+                <span className="h-3 w-3 rounded-full bg-muted" />
+                <span className="h-3 w-3 rounded-full bg-muted" />
+                <span className="h-3 w-3 rounded-full bg-muted" />
+                <span className="ml-3 text-xs text-muted-foreground">Natural QL</span>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/natural-ql.gif"
+                alt="Natural QL turning a plain-English question into validated, read-only SQL and results"
+                className="block w-full"
+              />
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/natural-ql.gif"
-              alt="Natural QL turning a plain-English question into validated, read-only SQL and results"
-              className="block w-full"
-            />
           </div>
         </section>
 
         {/* ── Works with ── */}
         <section className="border-y border-border">
-          <div className="mx-auto flex max-w-5xl flex-col items-center gap-7 px-6 py-14">
+          <Reveal className="mx-auto flex max-w-5xl flex-col items-center gap-7 px-6 py-14">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Works with the databases you already run
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
               {databases.map((db) => (
-                <span key={db} className="text-xl font-semibold tracking-tight text-foreground/70">
+                <span
+                  key={db}
+                  className="text-xl font-semibold tracking-tight text-foreground/60 transition-colors hover:text-foreground"
+                >
                   {db}
                 </span>
               ))}
             </div>
-          </div>
+          </Reveal>
         </section>
 
         {/* ── Features ── */}
         <section id="features" className="mx-auto max-w-5xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center">
+          <Reveal className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Powerful by default, safe by design
             </h2>
@@ -185,19 +212,18 @@ export function LandingPage() {
               Natural QL pairs AI-drafted SQL with hard guardrails and an approval gate,
               so you move fast without handing the keys to a model.
             </p>
-          </div>
+          </Reveal>
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-2xl border border-border bg-card p-6 transition-colors hover:bg-accent"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <feature.icon size={18} />
-                </span>
-                <h3 className="mt-4 text-base font-semibold tracking-tight">{feature.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{feature.description}</p>
-              </div>
+            {features.map((feature, i) => (
+              <Reveal key={feature.title} delay={i * 80} className="h-full">
+                <div className="hover-lift h-full rounded-2xl border border-border bg-card p-6 hover:border-ring/30 hover:bg-accent">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                    <feature.icon size={18} />
+                  </span>
+                  <h3 className="mt-4 text-base font-semibold tracking-tight">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{feature.description}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -205,21 +231,23 @@ export function LandingPage() {
         {/* ── How it works ── */}
         <section id="how" className="border-t border-border">
           <div className="mx-auto max-w-5xl px-6 py-24">
-            <div className="mx-auto max-w-2xl text-center">
+            <Reveal className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 From question to answer in three steps
               </h2>
               <p className="mt-4 text-balance text-muted-foreground">
                 A user-in-the-loop flow that keeps you in control the whole way through.
               </p>
-            </div>
+            </Reveal>
             <div className="mt-14 grid gap-5 md:grid-cols-3">
-              {steps.map((step) => (
-                <div key={step.step} className="rounded-2xl border border-border bg-card p-7">
-                  <span className="font-mono text-sm text-muted-foreground">{step.step}</span>
-                  <h3 className="mt-3 text-lg font-semibold tracking-tight">{step.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-                </div>
+              {steps.map((step, i) => (
+                <Reveal key={step.step} delay={i * 120} className="h-full">
+                  <div className="hover-lift h-full rounded-2xl border border-border bg-card p-7 hover:border-ring/30">
+                    <span className="font-mono text-sm text-muted-foreground">{step.step}</span>
+                    <h3 className="mt-3 text-lg font-semibold tracking-tight">{step.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
+                  </div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -227,7 +255,7 @@ export function LandingPage() {
 
         {/* ── CTA ── */}
         <section className="mx-auto max-w-5xl px-6 pb-24">
-          <div className="flex flex-col items-center gap-6 rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground">
+          <Reveal className="flex flex-col items-center gap-6 rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground">
             <h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
               Talk to your database in plain English
             </h2>
@@ -237,11 +265,11 @@ export function LandingPage() {
             </p>
             <Link
               href="/app"
-              className="rounded-full bg-background px-6 py-3 text-sm font-medium text-foreground transition-opacity hover:opacity-90"
+              className="rounded-full bg-background px-6 py-3 text-sm font-medium text-foreground transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg"
             >
               Open Natural QL
             </Link>
-          </div>
+          </Reveal>
         </section>
       </main>
 
