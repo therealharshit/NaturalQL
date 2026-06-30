@@ -13,8 +13,6 @@ import { Reveal } from "./reveal";
 
 const GITHUB_URL = "https://github.com/therealharshit/NaturalQL";
 const DEMO_URL = "https://youtu.be/FIOenBWCaoA";
-const USER_GUIDE_URL = `${GITHUB_URL}/blob/main/docs/user-guide.md`;
-const DEV_DOCS_URL = `${GITHUB_URL}/blob/main/docs/developer-docs.md`;
 
 const features = [
   {
@@ -115,9 +113,9 @@ export function LandingPage() {
             <a href="#how" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               How it works
             </a>
-            <a href={USER_GUIDE_URL} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <Link href="/docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               Docs
-            </a>
+            </Link>
             <a href={GITHUB_URL} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               GitHub
             </a>
@@ -336,8 +334,9 @@ export function LandingPage() {
               </div>
               <div className="flex flex-col gap-3">
                 <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Docs</h4>
-                <a href={USER_GUIDE_URL} className="text-sm text-muted-foreground transition-colors hover:text-foreground">User Guide</a>
-                <a href={DEV_DOCS_URL} className="text-sm text-muted-foreground transition-colors hover:text-foreground">Developer Docs</a>
+                <Link href="/docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Overview</Link>
+                <Link href="/docs/user-guide" className="text-sm text-muted-foreground transition-colors hover:text-foreground">User Guide</Link>
+                <Link href="/docs/developer-docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Developer Docs</Link>
                 <a href={DEMO_URL} className="text-sm text-muted-foreground transition-colors hover:text-foreground">Demo video</a>
               </div>
               <div className="flex flex-col gap-3">
