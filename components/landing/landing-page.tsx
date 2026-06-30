@@ -75,7 +75,17 @@ const steps = [
   },
 ];
 
-const databases = ["PostgreSQL", "MySQL", "SQLite"];
+const databases = [
+  "PostgreSQL",
+  "MySQL",
+  "SQLite",
+  "Supabase",
+  "Neon",
+  "PlanetScale",
+  "CockroachDB",
+  "Amazon RDS",
+  "MariaDB",
+];
 
 function Logo({ className = "" }: { className?: string }) {
   return (
@@ -129,17 +139,27 @@ export function LandingPage() {
             className="animate-glow pointer-events-none absolute left-1/2 top-44 -z-10 h-72 w-[36rem] max-w-[90vw] -translate-x-1/2 rounded-full bg-foreground/10 blur-3xl"
           />
           <span
-            className="animate-rise mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground"
+            className="animate-rise group relative mb-6 inline-flex items-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-1.5 text-xs font-semibold tracking-wide text-primary-foreground shadow-md ring-1 ring-foreground/10"
             style={{ "--delay": "0ms" } as CSSProperties}
           >
+            {/* sheen sweep */}
+            <span
+              aria-hidden
+              className="animate-badge-sheen pointer-events-none absolute inset-y-0 -left-8 w-8 bg-primary-foreground/25 blur-[3px]"
+            />
+            {/* live pulse dot */}
+            <span className="relative flex h-2 w-2">
+              <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            </span>
             <SparklesIcon size={13} />
-            AI database agent
+            <span className="relative">AI Database Agent</span>
           </span>
           <h1
             className="animate-rise max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl"
             style={{ "--delay": "80ms" } as CSSProperties}
           >
-            Ask your database anything
+            Ask your Database Anything
           </h1>
           <p
             className="animate-rise mt-6 max-w-2xl text-balance text-lg text-muted-foreground"
@@ -184,22 +204,33 @@ export function LandingPage() {
         </section>
 
         {/* ── Works with ── */}
-        <section className="border-y border-border">
-          <Reveal className="mx-auto flex max-w-5xl flex-col items-center gap-7 px-6 py-14">
+        <section className="overflow-hidden border-y border-border py-14">
+          <Reveal className="mx-auto mb-9 max-w-5xl px-6 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Works with the databases you already run
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
-              {databases.map((db) => (
-                <span
-                  key={db}
-                  className="text-xl font-semibold tracking-tight text-foreground/60 transition-colors hover:text-foreground"
+          </Reveal>
+          {/* horizontal marquee, paused on hover, faded at the edges */}
+          <div className="group relative flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_8%,#000_92%,transparent)]">
+            <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
+              {[0, 1].map((copy) => (
+                <div
+                  key={copy}
+                  aria-hidden={copy === 1}
+                  className="flex shrink-0 items-center gap-x-14 px-7"
                 >
-                  {db}
-                </span>
+                  {databases.map((db) => (
+                    <span
+                      key={db}
+                      className="whitespace-nowrap text-xl font-semibold tracking-tight text-foreground/55 transition-colors hover:text-foreground"
+                    >
+                      {db}
+                    </span>
+                  ))}
+                </div>
               ))}
             </div>
-          </Reveal>
+          </div>
         </section>
 
         {/* ── Features ── */}
