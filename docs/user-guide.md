@@ -1,6 +1,6 @@
 # Natural QL User Guide
 
-Welcome! This guide walks you through using Natural QL from start to finish. No SQL knowledge required - that's the whole point. You ask questions in plain English, and Natural QL handles the database part.
+Welcome! This guide walks you through using Natural QL from start to finish. No SQL knowledge required! that's the whole point. You ask questions in plain English, and Natural QL handles the database part.
 
 Here's the journey you'll take:
 
@@ -14,18 +14,11 @@ flowchart LR
 
 ## Before you start
 
-You need one thing: a **Google Gemini API key** (it's what writes the SQL and explains your results). It's free to get from [Google AI Studio](https://aistudio.google.com/apikey).
+You need just one thing: **a database you can connect to** (PostgreSQL, MySQL, or SQLite) and its connection details. Natural QL only ever reads, so read access is plenty.
 
-Put it in a `.env` file in the project root:
-```bash
-GEMINI_API_KEY=your_gemini_api_key_here
-```
+To open the workspace, click **Open app** (or **Get started**) from the home page. That's the chat screen where everything happens. The AI that writes and explains your SQL is already set up for you, so there's nothing to install or configure.
 
-Then start the app:
-```bash
-pnpm dev
-```
-Open `http://localhost:3000/app` in your browser. That's the chat workspace where everything happens.
+> **Running your own copy instead?** Self-hosting takes a free Google Gemini API key and a couple of commands. It's all in [Running it locally](#running-it-locally) at the end of this guide.
 
 ## Step 1: Connect a database
 
@@ -80,3 +73,27 @@ That's it. Ask a follow-up question any time, or start a **New Chat** from the s
 - **It only reads.** Even if you ask it to delete or change something, the safety layer blocks it. Natural QL is a read-only tool by design.
 - **100-row cap.** Results are limited to 100 rows. Ask a more specific question (or add your own `LIMIT`) if you need a narrower slice.
 - **Nothing leaves your browser** except the query and schema needed to answer your question. Credentials stay local to your session.
+
+## Running it locally
+
+Most people can use the hosted app and skip this section. But if you'd rather run your own copy, here's the whole setup.
+
+You'll need [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io) installed, plus a free **Google Gemini API key** (it's what writes the SQL and explains your results). Grab a key from [Google AI Studio](https://aistudio.google.com/apikey).
+
+1. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
+2. **Add your key** to a `.env` file in the project root:
+   ```bash
+   GEMINI_API_KEY=your_gemini_api_key_here
+   # Optional, defaults to gemini-2.5-flash
+   # GEMINI_MODEL=gemini-2.5-flash
+   ```
+3. **Start the app:**
+   ```bash
+   pnpm dev
+   ```
+   Then open `http://localhost:3000` in your browser and click **Open app** to start querying.
+
+For architecture, the API routes, and how everything fits together, see the [Developer Docs](developer-docs.md).
